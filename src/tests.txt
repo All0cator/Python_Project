@@ -8,10 +8,10 @@ Ingore this file underconstruction XDDD
 >>> buffer = Buffer(2, 2)
 >>> for y in range(2):
 >>>     for x in range(2):
->>>         buffer.Set(y, x) = x + y
+>>>         buffer.SetXY(y, x) = x + y
 >>> for y in range(2):
 >>>     for x in range(2):
->>>         print("Data at row = " + str(y) + " and column = " + str(x) + " is " + str(buffer.Get(y, x)))
+>>>         print("Data at row = " + str(y) + " and column = " + str(x) + " is " + str(buffer.GetXY(y, x)))
 >>> Data at row = 0 and column = 0 is 0
 >>> Data at row = 0 and column = 1 is 1
 >>> Data at row = 1 and column = 0 is 1

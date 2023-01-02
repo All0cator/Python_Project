@@ -1,0 +1,11 @@
+
+
+def InitGuards():
+    global CSVFILE_INCLUDED_GUARD,\
+    FILE_INCLUDED_GUARD,\
+    BUFFER_INCLUDED_GUARD
+    
+    CSVFILE_INCLUDED_GUARD = False
+    FILE_INCLUDED_GUARD = False
+    BUFFER_INCLUDED_GUARD = False
+    
