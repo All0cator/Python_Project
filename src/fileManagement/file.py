@@ -12,7 +12,7 @@ class File:
     """
     ------- Variables -------
     
-    <-- path            --> path of file                                (str) ex "\daewdewd\aweda\file"
+    <-- path            --> path of file                                (str) ex "\daewdewd\aweda\file.csv"
     <-- extension       --> extension of file                           (str) ex ".csv"
     <-- isAllowedToRead --> flag that permits read activities on file:  (bool)
                             True  if is allowed to read file

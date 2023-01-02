@@ -77,10 +77,9 @@ class Buffer:
         
     def GetXY(self, x, y):
         if(y >= self.height or x >= self.width):
-            print("Error: Buffer out of index coords (" + str(x) +", " + str(y) +")")
-            return
+            assert(False and "Error: Buffer out of index coords (" + str(x) +", " + str(y) +")")
         
-        return str(self.data[y * self.width + x])
+        return self.data[y * self.width + x]
     
     # treat buffer as 1 dimensional array
 
@@ -95,8 +94,7 @@ class Buffer:
     
     def SetXY(self, x, y, value):
         if(y >= self.height or x >= self.width):
-            print("Error: Buffer out of index coords (" + str(x) +", " + str(y) +")")
-            return
+            assert(False and "Error: Buffer out of index coords (" + str(x) +", " + str(y) +")")
 
         self.data[y * self.width + x] = value
     

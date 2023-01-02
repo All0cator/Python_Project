@@ -55,14 +55,17 @@ class CSVFile(File):
         return super().WriteFile(writeMode, content)
     
     def GetHeader(self):
-        return self.GetRow(1)
+        return self.GetRow(0)
     
     def GetNthRecord(self, n):
         return self.GetRow(n)
+    
+    def GetFinalRecord(self):
+        return self.GetRow(self.numRows - 1)
 
     def GetRow(self, y):
         
-        row = None
+        row = list()
         
         for x in range(self.numCols):
             row.append(self.dataTable.GetXY(x, y))
@@ -72,13 +75,14 @@ class CSVFile(File):
         
     def GetColumn(self, x):
         
-        col = None
+        col = list()
         
-        for y in range(self.numCols):
+        for y in range(self.numRows):
             col.append(self.dataTable.GetXY(x, y))
         
         # remove header from column to be returned
-        col.pop()
+        
+        col.pop(0)
             
         return col
     
