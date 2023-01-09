@@ -17,9 +17,12 @@
 
 #[ 30] |    1      2      3      4      5      6
 
-from calendar import *
+from fileManagement.buffer import BufferCreateI, BufferCreateXY
+from fileManagement.CSVFile import CSVFile
+from m_calendar.separator import Separator
+from m_calendar.month import Month
+from m_calendar.day import Day
 
-from fileManagement.buffer import Buffer, BufferCreateI, BufferCreateXY
 
 class CalendRa:
     
@@ -38,6 +41,8 @@ class CalendRa:
         
         self.currentMonth = Month(startingYear, startingMonth)
         
+        self.events = self.LoadEvents("assets/csvFiles/events.csv")
+        
         self.daysHeader = BufferCreateI(CalendRa.NUM_WEEKDAYS)
         
         x = 0
@@ -50,6 +55,12 @@ class CalendRa:
             x += 1
             
         self.UpdateCalendar()
+    
+    def LoadEvents(self, path):
+        file = CSVFile(path)
+        
+        events = BufferCreateXY(file.numCols, file.numRows)
+        
     
     def AdvanceMonth(self, direction):     
         if(not direction in CalendRa.DIRECTIONS):
@@ -87,14 +98,14 @@ class CalendRa:
             if(self.previousMonth.numDays - i < 10):
                 leftSeparator.Append(" ")
             leftSeparator.Append("   ")    
-            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.text)
+            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.ToText())
             
             
             self.calendar.GetI(j).value = self.previousMonth.numDays - i
             
             
             rightSeparator.Append(" |")
-            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.text)
+            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.ToText())
             
             j += 1
             i -= 1 
@@ -110,7 +121,7 @@ class CalendRa:
             if(i < 10):
                 leftSeparator.Append(" ")
             
-            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.text)
+            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.ToText())
             
             
             self.calendar.GetI(j).value = i
@@ -119,7 +130,7 @@ class CalendRa:
             rightSeparator.Append("] ")
             if((j + 1) % 7 != 0):
                 rightSeparator.Append("|")
-            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.text)
+            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.ToText())
             
             j += 1
             i += 1
@@ -133,76 +144,16 @@ class CalendRa:
             if(i < 10):
                 leftSeparator.Append(" ")
             leftSeparator.Append("   ")
-            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.text)
+            self.calendar.GetI(j).leftSeparator.Append(leftSeparator.ToText())
             
             
             self.calendar.GetI(j).value = i
             
             
             rightSeparator.Append("  ")
-            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.text)
+            self.calendar.GetI(j).rightSeparator.Append(rightSeparator.ToText())
             
             i += 1
             j += 1
-        
-class Month:
-    def __init__(self, year, month):
-        
-        self.value = month
-        self.year = year
-        
-        self.weeks = monthcalendar(year, month)
-        
-        tup = monthrange(year, month)
     
-        self.firstDayInWeekIndex = tup[0]
     
-        self.numDays = tup[1]
-        
-    def GetPreviousMonth(self):
-        
-        month = self.value
-        year = self.year
-        
-        if(month == 1):
-            month = 12
-            year = year - 1
-        else:
-            month = month - 1
-            # self.year doesnt change
-            
-        return Month(year, month)
-
-    def GetNextMonth(self):
-        
-        month = self.value
-        year = self.year
-        
-        if(month == 12):
-            month = 1
-            year = year + 1
-        else:
-            month = month + 1
-            # year doesnt change
-        
-        return Month(year, month)
-    
-class Day:
-    def __init__(self, value, textLeftSeparator="", textRightSeparator=""):
-        self.value = value
-        self.leftSeparator = Separator(textLeftSeparator)
-        self.rightSeparator = Separator(textRightSeparator)
-        
-    def GetText(self):
-        return self.leftSeparator.text + str(self.value) + self.rightSeparator.text
-
-class Separator:
-    def __init__(self, text="", isALine=False):
-        self.text = text
-        self.isALine = isALine
-    
-    def Append(self, value):
-        if(self.isALine):
-            assert(False and "Error: Cannot append more text in a line.")
-        
-        self.text += value
