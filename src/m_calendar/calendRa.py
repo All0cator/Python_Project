@@ -59,7 +59,75 @@ class CalendRa:
     def LoadEvents(self, path):
         file = CSVFile(path)
         
-        events = BufferCreateXY(file.numCols, file.numRows)
+        eventsBuffer = BufferCreateI(file.numRows)
+        
+        self.numEvents = 0
+        
+        self.header = file.GetHeader()
+        
+        for i in range(1, file.numRows):
+            record = file.GetNthRecord(i)
+            
+            self.numEvents += 1
+            
+            # unpacking record
+            
+            
+            
+            eventsBuffer.SetI(i, Event(record.))
+            
+    def SaveEvents(self, path):
+        file = CSVFile(path)
+        
+        dataToSave = BufferCreateI(self.numEvents)
+        
+        for i in range(self.numEvents):
+            dataToSave.SetI(i, self.events.GetI(i).ToCSVLine())
+        
+        #clear file
+        emptyBuffer = BufferCreateI(1)
+        emptyBuffer.SetI(0, "")
+        
+        file.WriteFile("w", emptyBuffer)
+        
+        
+        
+        file.WriteFile("w", dataToSave)
+        
+    def AddEvent(self, event, day):
+        eventsBuffer = BufferCreateI(self.numEvents + 1)
+        
+        # copy old events to new Buffer
+        
+        for i in range(self.numEvents):
+            eventsBuffer.SetI(i, self.events[i])
+            
+        
+        # add new event
+        self.numEvents += 1
+        
+        lastIndex = self.numEvents - 1
+        
+        eventsBuffer.SetI(lastIndex, event)    
+        
+        # copy new eventsBuffer to our old one
+        
+        self.events = BufferCreateI(self.numEvents)
+        
+        for i in range(self.numEvents):
+            self.events.SetI(i, eventsBuffer.GetI(i))
+            
+        self.events.Sort()
+    
+    def CSVToEvent():
+        
+    
+    def GetEvents(self, year, month):
+        
+        selectedEvents = BufferCreateI
+        
+        for i in range(self.numEvents):
+            self.events.GetI(i)
         
     
     def AdvanceMonth(self, direction):     
@@ -67,9 +135,9 @@ class CalendRa:
             assert(False and "Error: Wrong direction given for AdvanceMonth()")
         
         if(direction == CalendRa.DIRECTION_NEXT):
-            self.currentMonth = self.currentMonth.GetNextMonth()
+            self.currentMonth = self.currentMonth.GetNextMonth(self.events)
         else:
-            self.currentMonth = self.currentMonth.GetPreviousMonth()
+            self.currentMonth = self.currentMonth.GetPreviousMonth(self.events)
         
         self.UpdateCalendar()    
         

@@ -8,11 +8,12 @@ from m_calendar.separator import Separator
 #        self.text = textPlaceholder
 
 class Menu():
-    def __init__(self, header, options, input_, textLineTop=""):
+    def __init__(self, header, options, input_, availableOptions, textLineTop=""):
         #super().__init__(header)
         self.header = header
         self.options = options
         self.input = input_
+        self.availableOptions = availableOptions
         self.lineTop = Line(textLineTop)
         
     def ToText(self):

@@ -106,3 +106,20 @@ class Buffer:
         y = index // self.width
         
         self.SetXY(x, y, value)
+        
+    def Append(self, value):
+        newBuffer = BufferCreateI(self.size + 1)
+        
+        self.Copy(newBuffer)
+        
+        lastElemenetIndex = newBuffer.size - 1
+        newBuffer.SetI(lastElemenetIndex, value)
+        
+        self = newBuffer
+    
+    def Sort(self, isAscending=True):
+        self.data.sort(reverse=not isAscending)
+        
+    def Copy(self, targetBuffer):
+        for i in range(self.size):
+            targetBuffer.SetI(i, self.GetI(i))

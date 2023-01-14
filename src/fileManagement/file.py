@@ -58,7 +58,7 @@ class File:
         return True
         
 
-    def WriteFile(self, writeMode, content):
+    def WriteFile(self, writeMode, contentBuffer):
         if(not self.isAllowedToWrite):
             print("Error: Not allowed to write file at: " + self.path + " because file cannot be opened for writing.")
             return False
@@ -69,13 +69,27 @@ class File:
         
         file = open(self.path, writeMode)
         
-        file.write(content)
+        file.write(self.BufferToText(contentBuffer))
         
-        self.fileContents = None
+        self.fileContents = contentBuffer
         
         file.close()
         
         return True
+    
+    def BufferToText(self, buffer):
+        
+        text = ""
+        
+        for y in range(buffer.height):
+            for x in range(buffer.width):
+                text += buffer.GetXY(x, y)
+        
+            # if the final character of text is not a newline then add a new line to it
+            if(text[len(text) - 1] != "\n"):
+                text += "\n"
+            
+        return text
     
     # Note this will not be part of the file.py final version its just for debuggin purposes
     

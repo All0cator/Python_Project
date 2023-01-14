@@ -33,4 +33,8 @@ class Separator:
         
         self.text += value
 
-    
+    def ReplaceEndCharacterWith(self, value):
+        if(self.isALine):
+            assert(False and "Error: Replacing text in a line is not allowed.")
+
+        self.text = self.text[:len(self.text) - 1] + value

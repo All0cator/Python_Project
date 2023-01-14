@@ -47,12 +47,16 @@ class CSVFile(File):
         
         return True
         
-    def WriteFile(self, writeMode, content):
+    def WriteFile(self, writeMode, contentBuffer):
         
-        #format content into csv format to do
-        csvLine = content[0]
+        #format contentBuffer into csv format to do
         
-        return super().WriteFile(writeMode, content)
+        rows = BufferCreateI(contentBuffer.numRows)
+        
+        for i in range(contentBuffer.numRows):
+            rows.SetI(i, self.ListToCSVRow(contentBuffer.GetRow(i)))
+        
+        return super().WriteFile(writeMode, rows)
     
     def GetHeader(self):
         return self.GetRow(0)
@@ -73,6 +77,18 @@ class CSVFile(File):
         # rerurns a list ["1st elemnt", "2nd elemtn", ...]
         return row
         
+    def ListToCSVRow(self, li):
+        row = ""
+        
+        for i in range(1, len(li) - 1):
+            row += str(li[i]) + ","
+            
+        finalElementIndex = len(li) - 1
+        
+        row += li[finalElementIndex] + "\n"
+        
+        return row
+    
     def GetColumn(self, x):
         
         col = list()

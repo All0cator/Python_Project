@@ -14,6 +14,9 @@ class Month:
     
         self.numDays = tup[1]
         
+        self.events = None
+        self.numEvents = 0
+        
     def GetPreviousMonth(self):
         
         month = self.value

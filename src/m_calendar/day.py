@@ -10,6 +10,9 @@ class Day:
         self.numEvents = 0
         
     def ToText(self):
+        if(self.numEvents > 0):
+            self.leftSeparator.ReplaceEndCharacterWith("*")
+        
         return self.leftSeparator.ToText() + str(self.value) + self.rightSeparator.ToText()
     
     def AddEvent(self, event):
@@ -34,4 +37,6 @@ class Day:
         
         for i in range(self.numEvents):
             self.events.SetI(i, eventsBuffer.GetI(i))
+            
+        self.events.Sort()
     

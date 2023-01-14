@@ -5,13 +5,15 @@ from ui.menu import Menu, Option, Input
 
 CONSOLE_LINE_LENGTH = 50
 
+
 mainMenuHeader = "Πατήστε ENTER για προβολή του επόμενου μήνα, \"q\" για έξοδο ή κάποια από τις παρακάτω επιλογές:"
 mainMenuOptions = [ Option("για πλοήγηση στον προηγούμενο μήνα", "\"-\" "),          
                     Option("για διαχείριση των γεγονότων του ημερολογίου", "\"+\" "),     
                     Option("για εμφάνιση των γεγονότων ενός επιλεγμένου μήνα", "\"*\" ")]
 mainMenuInput = Input("->")
+mainMenuAvailableOptions = ["q", "-", "+", "*", ""]
 
-mainMenu = Menu(mainMenuHeader, mainMenuOptions, mainMenuInput, "-")
+mainMenu = Menu(mainMenuHeader, mainMenuOptions, mainMenuInput, mainMenuAvailableOptions, "-")
 
 #menu = """Πατήστε ENTER για προβολή του επόμενου μήνα, "q" για έξοδο ή κάποια από τις
 #        παρακάτω επιλογές:
@@ -19,6 +21,17 @@ mainMenu = Menu(mainMenuHeader, mainMenuOptions, mainMenuInput, "-")
 #        "+" για διαχείριση των γεγονότων του ημερολογίου
 #        "*" για εμφάνιση των γεγονότων ενός επιλεγμένου μήνα
  #       ->"""
+
+manageMenuHeader = "Διαχείριση γεγονότων ημερολογίου, επιλέξτε ενέργεια:"
+manageMenuOptions = [ Option("Καταγραφή νέου γεγονότος", "1 "),
+                      Option("Διαγραφή γεγονότος", "2 "),
+                      Option("Ενημέρωση γεγονότος", "3 "),
+                      Option("Επιστροφή στο κυρίως μενού", "0 ")]
+manageMenuInput = Input("->")
+
+manageMenuAvailableOptions = ["1", "2", "3", "0"]
+
+manageMenu = Menu(manageMenuHeader, manageMenuOptions, manageMenuInput, manageMenuAvailableOptions, "-")
 
 class Console(Surface):
     def __init__(self):
@@ -41,10 +54,8 @@ class Console(Surface):
                 
                 self.PrintCalendar()
                 print(mainMenu.ToText(), end="")
-                option = input(mainMenu.GetInputText())
                 
-                while(option not in ["-", "+", "*", "q", ""]):
-                    option = input(mainMenu.GetInputText())
+                option = self.GetMenuInput(mainMenu)
                 
                 continue
 
@@ -54,19 +65,40 @@ class Console(Surface):
                 self.PrintCalendar()
                 print(mainMenu.ToText(), end="")
                 
-                
-                option = input(mainMenu.GetInputText())
-                
-                while(option not in ["-", "+", "*", "q", ""]):
-                    option = input(mainMenu.GetInputText())
+                option = self.GetMenuInput(mainMenu)
                 
                 continue
             elif(option == "+"):
-                self.Print
+                print(manageMenu.ToText(), end="")
+                
+                option = self.GetMenuInput(manageMenu)
+                
+                if(option == "1"):
+                    self.SearchEvents()
+                elif(option == "2"):
+                    self.SearchEvents()
+                elif(option == "3"):
+                    self.SearchEvents()
+                elif(option == "0"):
+                    pass
+                continue
+                
             elif(option == "*"):
                 pass
                 
             option = input()
+        
+            
+    def SearchEvents(self):
+        
+            
+    def GetMenuInput(menu):
+        option = input(menu.GetInputText())
+                
+        while(option not in menu.availableOptions):
+            option = input(menu.GetInputText())
+            
+        return option
     
     def PrintCalendar(self):
         
