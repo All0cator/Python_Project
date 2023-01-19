@@ -23,7 +23,8 @@ class Separator:
         line = self.text
         while(len(line) < CONSOLE_LINE_LENGTH):
             for char in self.text:
-                line += char
+                if(len(line) < CONSOLE_LINE_LENGTH):
+                    line += char
                 
         return line
     

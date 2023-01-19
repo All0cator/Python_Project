@@ -1,5 +1,5 @@
 from datetime import *
-from eventAttribute import EventAttribute
+from m_calendar.eventAttribute import EventAttribute
 
 ATTRIBUTE_NAMES = ["Date", "Hour", "Duration", "Title"]
 NUM_ATTRIBUTE_NAMES = 4
@@ -7,25 +7,22 @@ NUM_ATTRIBUTE_NAMES = 4
 TIME_ATTRIBUTE_NAMES = ["Date", "Hour", "Duration"]
 NUM_TIME_ATTRIBUTE_NAMES = 3
 
-def CreateEventFromRecord(attributes, attributeNames):
-    return Event(attributes, attributeNames)
-
 class Event:
     """
     
     """
     
-    def __init__(self, attributes, attributeNames, titleBoard=["[", "]"], pointer="->"):
+    def __init__(self, attributes, titleBoard=["[", "]"], pointer="->"):
         
-        if(len(attributes) == 0):
-            assert(False and "Error: Event given no attributes!")
+        if(len(attributes) != ATTRIBUTE_NAMES):
+            assert(False and "Error: Event given not enough attributes!")
         
         for i in range(len(attributes)):
-            # dictionary with keys attributeNames and values attributes
+            # dictionary with keys ATTRIBUTE_NAMES and values attributes
             if(attributes[i].isdigit()):
-                self.attributes[attributeNames[i]] = EventAttribute(int(attributes[i]))
+                self.attributes[ATTRIBUTE_NAMES[i]] = EventAttribute(int(attributes[i]))
             else:
-                self.attributes[attributeNames[i]] = EventAttribute(attributes[i])
+                self.attributes[ATTRIBUTE_NAMES[i]] = EventAttribute(attributes[i])
         
         self.Update(titleBoard, pointer)
     
@@ -39,27 +36,37 @@ class Event:
         eventEndsBetweenOtherEvent = event.end > self.start and event.end <= self.end
         eventBeginsBetweenOtherEvent = event.start >= self.start and event.start < self.end
         
-        if(eventEndsBetweenOtherEvent or eventBeginsBetweenOtherEvent):
+        if((eventEndsBetweenOtherEvent or eventBeginsBetweenOtherEvent) and event.date == self.date):
             return True
         
         return False
     
         # Yes i could return eventEndsBetweenOtherEvent or eventBeginsBetweenOtherEvent but the way i did it was more clear to the reader
     
+    def OverlapsWithOtherEvents(self, events):
+        for i in range(events.size):
+            if(self.OverlapsWith(events.GetI(i))):
+                return True
+            
+        return False
+    
     def Set(self, attributeName, value):
         # The reason \n is used in docstring bellow is to make each attribute appear on its own line when hovering on Get
         
         """
-        attributeNames : 
+        ATTRIBUTE_NAMES : 
             "Date"             eg 2022-11-25\n
             "Hour"             eg 10:50\n
             "Duration"     eg 90\n
             "Title"           eg Python Lesson\n
         """
         
-        self.attributes[attributeName] = value
+        self.attributes[attributeName].val = value
         
-    def Update(self, titleBoard, pointer):
+        # i dont care about performance after i change one of the event's attributes i update everything
+        self.Update()
+        
+    def Update(self, titleBoard=["[", "]"], pointer="->"):
         
         self.titleBoard = titleBoard
         self.pointer = pointer
@@ -82,7 +89,7 @@ class Event:
         # The reason \n is used in docstring bellow is to make each attribute appear on its own line when hovering on Get
         
         """
-        attributeNames : 
+        ATTRIBUTE_NAMES : 
             "Date"             eg 2022-11-25\n
             "Hour"             eg 10:50\n
             "Duration"     eg 90\n
@@ -91,7 +98,7 @@ class Event:
         if(not attributeName in self.attributes.keys()):
             assert(False and f"Error: atribute name {attributeName} not found in dictionary")
         
-        return self.attributes[attributeName]
+        return self.attributes[attributeName].val
     
     def ToCSVLine(self):
         line = ""
@@ -113,8 +120,8 @@ class Event:
         # titleBoard = []
         text += self.titleBoard[0] + self.title + self.titleBoard[1] + " " + self.pointer + " "
 
-        for attribute in self.attributes:
-            text += attribute.ToText()
+        for i in range(NUM_ATTRIBUTE_NAMES):
+            text += self.attributes[ATTRIBUTE_NAMES[i]].ToText()
     
     # Compare two Events only by their time(date and hour) duration and title doesnt affect comparisons
     
