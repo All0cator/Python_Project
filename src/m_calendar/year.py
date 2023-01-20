@@ -78,7 +78,7 @@ class Year(Eventable):
         eventToDelete = self.events.GetI(index)
         
         if(self.currentMonth.EventExists(eventToDelete)):
-            self.currrentMonth.DelEvent()
+            self.currentMonth.DelEvent(eventToDelete)
         
         
         super().DelEvent(index)

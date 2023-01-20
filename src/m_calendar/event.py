@@ -132,7 +132,7 @@ class Event:
             line += str(self.Get(ATTRIBUTE_NAMES[i])) + ","
             
         finalIndex = NUM_ATTRIBUTE_NAMES - 1
-        line += ATTRIBUTE_NAMES[finalIndex]
+        line += self.Get(ATTRIBUTE_NAMES[finalIndex]) + "\n"
         
         return line
         

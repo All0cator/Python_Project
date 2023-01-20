@@ -2,12 +2,15 @@ from ui.surface import Surface
 from m_calendar.calendRa import CalendRa
 from calendar import monthrange
 
+from m_calendar.interval import Interval
 from datetime import date
 from datetime import datetime
 
 from m_calendar.event import Event
 
 from ui.menu import Menu, Option, Input
+
+from ui.validationFunctions import *
 
 CONSOLE_LINE_LENGTH = 50
 
@@ -50,10 +53,15 @@ class Console(Surface):
         day = int(day)
         
         
+        print(year, month, day)
+        
         # dont ask about + 2 the docs about datetime are so bad i have to offset the hour i get by 2 hours
         # thats some timezone problem in which cannot be solved without external libraries
         
-        hour = datetime.now().hour + 2 # magic
+        hour = datetime.now().hour# magic
+        minutes = datetime.now().minute
+        
+        print(hour, minutes)
         
         eventsForToday = self.calendR.GetEvents(year, month, day)
         
@@ -65,11 +73,13 @@ class Console(Surface):
             
             e = eventsForToday.GetI(i)
             
-            hourDifference = e.hour - hour
+            hoursDifference = e.hour - hour
+            minsDifference = e.minutes - minutes
             
             # events that are due for today
-            if(hourDifference > 0):
-                print("Ειδοποίηση: σε {0} ώρες από τώρα έχει προγραμματιστεί το γεγονός :\n {1}".format(hourDifference, e.ToText()))
+            print(hoursDifference, minsDifference)
+            if(hoursDifference > 0 and minsDifference > 0):
+                print("Ειδοποίηση: σε {0} ώρες και {1} λεπτά από τώρα έχει προγραμματιστεί το γεγονός :\n {2}".format(hoursDifference, minsDifference, e.ToText()))
         
     def OnUpdate(self):
         
@@ -174,21 +184,25 @@ class Console(Surface):
             return None
             
         
-        alignmentText = "Διαθέσιμα χρονικά κενά: "
+        alignmentText = "Μη Διαθέσιμα χρονικά κενά: "
         
         print(alignmentText)
         
         for i in range(intervals.size):
-            #if(intervals.GetI(i).startHourMin != intervals.GetI(i).endHourMin):
-            print(len(alignmentText)*" " + intervals.GetI(i).ToText())
+            if(intervals.GetI(i).startHourMin != intervals.GetI(i).endHourMin):
+                print(len(alignmentText)*" " + intervals.GetI(i).ToText())
         
         newHour = self.ConstructHour(chosenEvent, isBlankF)
         
         newDurationInput = Input("Διάρκεια γεγονότος")
-        newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or isBlankF(dur))
+        newDurationValidationFunc = lambda d: DurationValidation(d, isBlankF)
+        #newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or isBlankF(dur))
+        newDuration = newDurationInput.GetValidatedInput(newDurationValidationFunc)
         
         newTitleInput = Input("Τίτλος γεγονότος")
-        newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or isBlankF(title))
+        newTitleValidationFunc = lambda title: TitleValidation(title, isBlankF)
+        #newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or isBlankF(title))
+        newTitle = newTitleInput.GetValidatedInput(newTitleValidationFunc)
         
         eventAttributes = [newDate, newHour, str(newDuration), newTitle]
         
@@ -220,29 +234,36 @@ class Console(Surface):
         
         chosenEvent = selectedEvents.GetI(eventChoice)
         
-        newDate = self.ConstructDate(chosenEvent, lambda x: False)
+        newDate = self.ConstructDate(chosenEvent, lambda x: x == "")
         
         year, month, day = newDate.split("-")
         
-        checkDay = self.calendR.GetDayOfYearMonth(year, month, day)
+        checkDay = self.calendR.GetDayOfYearMonth(int(year), int(month), int(day))
         
         intervals = checkDay.GetDayIntervals()
+        if(intervals == None):
+            print("Δεν υπάρχουν διαθέσιμα χρονικά κενά για αυτήν την ημερομηνία!")
+            return None
         
-        alignmentText = "Διαθέσιμα χρονικά κενά: "
+        alignmentText = "Μη Διαθέσιμα χρονικά κενά: "
         
         print(alignmentText)
         
         for i in range(intervals.size):
-            print(len(alignmentText)*" " + intervals.GetI(i))
+            if(intervals.GetI(i).startHourMin != intervals.GetI(i).endHourMin):
+                print(len(alignmentText)*" " + intervals.GetI(i).ToText())
         
-        newHour = self.ConstructHour(chosenEvent, lambda x: False)
+        newHour = self.ConstructHour(chosenEvent, lambda x: x == "")
         
         newDurationInput = Input("Διάρκεια γεγονότος " + "(" + str(chosenEvent.Get("Duration")) + ")")
-        newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or dur == "")
+        newDurationValidationFunc = lambda d: DurationValidation(d)
+        #newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or dur == "")
+        newDuration = newDurationInput.GetValidatedInput(newDurationValidationFunc)
         
         newTitleInput = Input("Τίτλος γεγονότος " + "(" + chosenEvent.Get("Title") + ")")
-        newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or str(title) == "")
-        
+        newTitleValidationFunc = lambda title: TitleValidation(title)
+        #newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or str(title) == "")
+        newTitle = newTitleInput.GetValidatedInput(newTitleValidationFunc)
         
         if(newDuration == ""):
             newDuration = chosenEvent.Get("Duration")
@@ -259,7 +280,7 @@ class Console(Surface):
         
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Date", newDate)
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Hour", newHour)
-        self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Duration", str(newDuration))
+        self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Duration", newDuration)
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Title", newTitle)  
             
     def SearchEvents(self):
@@ -267,11 +288,15 @@ class Console(Surface):
         print("=== Αναζήτηση γεγονότων ====")
         
         yearInputField = Input("Εισάγετε έτος")
-        year = yearInputField.GetValidatedInput(lambda y: y >= 1 and y <= 9999)
+        yearValidationFunc = lambda y : YearCreateValidation(y)
+        #year = yearInputField.GetValidatedInput(lambda y: y >= 1 and y <= 9999)
+        year = yearInputField.GetValidatedInput(yearValidationFunc)
         
         monthInputField = Input("Εισάγετε μήνα")
-        month = monthInputField.GetValidatedInput(lambda m: m >= 1 and m <= 12)
-        
+        monthValidationFunc = lambda m: MonthValidation(m, lambda x: False)
+        #month = monthInputField.GetValidatedInput(lambda m: m >= 1 and m <= 12)
+        month = monthInputField.GetValidatedInput(monthValidationFunc)
+            
         tup = self.calendR.GetEventsText(year, month)
         
         eventsText = tup[0]
@@ -288,8 +313,8 @@ class Console(Surface):
         else:
             dateInputText = "Ημερομηνία γεγονότος " + "(" + chosenEvent.Get("Date") + "):"
         
-        newYearValidationFunction = lambda year: year >= 2022 or isBlankF(year)
-        newMonthValidationFunction = lambda m: (m >= 1 and m <= 12) or isBlankF(m)
+        newYearValidationFunction = lambda y: YearUpdateValidation(y, isBlankF)
+        newMonthValidationFunction = lambda m: MonthValidation(m, isBlankF)
         
         print(dateInputText)
         
@@ -301,19 +326,21 @@ class Console(Surface):
         newMonthInput = Input("Μήνας γεγονότος", " "*len(dateInputText))
         newMonth = newMonthInput.GetValidatedInput(newMonthValidationFunction)
         
-        numDaysForNewMonth = monthrange(newYear, newMonth)[1]
-        
-        # the validation function needs numDaysForNewMonth to work so we have to define it here and not with the other functions
-        newDayValidationFunction = lambda d: (d >= 1 and d <= numDaysForNewMonth) or isBlankF(d)
-        
-        newDayInput = Input("Ημέρα γεγονότος", " "*len(dateInputText))
-        newDay = newDayInput.GetValidatedInput(newDayValidationFunction)
-        
         if(newYear == ""):
             newYear = chosenEvent.year
             
         if(newMonth == ""):
             newMonth = chosenEvent.month
+        
+        print(newYear, newMonth)
+        
+        numDaysForNewMonth = monthrange(int(newYear), int(newMonth))[1]
+        
+        # the validation function needs numDaysForNewMonth to work so we have to define it here and not with the other functions
+        newDayValidationFunction = lambda d: DayValidation(d, numDaysForNewMonth, isBlankF)
+        
+        newDayInput = Input("Ημέρα γεγονότος", " "*len(dateInputText))
+        newDay = newDayInput.GetValidatedInput(newDayValidationFunction)
         
         if(newDay == ""):
             newDay = chosenEvent.day
@@ -329,8 +356,8 @@ class Console(Surface):
         else:
             hourInputText = "Ώρα γεγονότος " + "(" + chosenEvent.Get("Hour") + "):"
 
-        newHourValidationFunction = lambda h: (h >= 0 and h <= 23) or isBlankF(h)
-        newMinutesValidationFunction = lambda m: (m >= 0 and m <= 59) or isBlankF(m)
+        newHourValidationFunction = lambda h: HourValidation(h, isBlankF)
+        newMinutesValidationFunction = lambda m: MinuteValidation(m, isBlankF)
         
         print(hourInputText)
         

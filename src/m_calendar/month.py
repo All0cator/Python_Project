@@ -11,9 +11,9 @@ class Month(Eventable):
 
         Eventable.__init__(self)
         
-        self.value = month
+        self.value = int(month)
         
-        self.year = year
+        self.year = int(year)
         self.eventsToFilter = eventsToFilter
         
         if(eventsToFilter != None and eventsToFilter.size != 0):
@@ -37,9 +37,9 @@ class Month(Eventable):
                     self.events.SetI(i, eventsList[i])
         
         
-        self.weeks = monthcalendar(year, month)
+        self.weeks = monthcalendar(self.year, self.value)
         
-        tup = monthrange(year, month)
+        tup = monthrange(self.year, self.value)
     
         self.firstDayInWeekIndex = tup[0]
     

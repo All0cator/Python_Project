@@ -13,13 +13,15 @@ class Interval:
         self.startMins = self.mins
         self.startHour = self.hour
         
+        self.start = self.startMins + self.startHour * 60
+        
         self.startHourMin = ":".join([str(self.startHour), str(self.startMins)])
         
         self.endMins = (self.startMins + self.duration) % 60
         
-        self.endHour = self.startHour + (self.startMins + self.duration) // 60
+        self.endHour = (self.startHour + int((self.startMins + self.duration) / 60)) % 24
         
-        self.endHour %= 24
+        self.end = self.endMins + self.endHour * 60
         
         self.endHourMin = ":".join([str(self.endHour), str(self.endMins)])
         

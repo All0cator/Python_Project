@@ -84,13 +84,14 @@ class Eventable:
         if(self.numEvents == 0):
             return
         
-        eventsBuffer = BufferCreateI(self.numEvents - 1)
+        eventsBuffer = BufferCreateI(self.numEvents)
         
         # copy old events to new Buffer except the event at index
         
         for i in range(self.numEvents):
             # skip event at our specified index
             if(i == index):
+                eventsBuffer.SetI(i, None)
                 continue
             
             eventsBuffer.SetI(i, self.events.GetI(i))
@@ -101,10 +102,24 @@ class Eventable:
         
         # copy new eventsBuffer to our old one
         
+        if(self.numEvents == 0):
+            self.events = None
+            return
+        
         self.events = BufferCreateI(self.numEvents)
         
-        for i in range(self.numEvents):
-            self.events.SetI(i, eventsBuffer.GetI(i))
+        i = 0
+        j = 0
+        
+        while(i < self.events.size and j < eventsBuffer.size):
+            if(eventsBuffer.GetI(j) == None):
+                j += 1
+                continue
+            
+            self.events.SetI(i, eventsBuffer.GetI(j))
+            
+            i += 1
+            j += 1
             
     def DelEvent(self, event):
         """

@@ -96,7 +96,7 @@ class CalendRa(Eventable):
         
             dataToSave = BufferCreateI(self.numEvents)
             
-            for i in range(self.numEvents):
+            for i in range(self.events.size):
                 dataToSave.SetI(i, self.events.GetI(i).ToCSVLine())
         else:
             dataToSave = BufferCreateI(1)
@@ -132,16 +132,7 @@ class CalendRa(Eventable):
         
     def DelEventAt(self, index):
         
-        eventToDelete = self.events.GetI(index)
-        
-        for i in range(self.numDays):
-            
-            index = self.days.GetI(i).EventExists(eventToDelete)
-            
-            if(index != -1):
-                self.days.GetI(i).DelEvent(index)
-                break
-            
+        eventToDelete = self.events.GetI(index)     
             
         if(eventToDelete.year == self.currentYear.value):
             self.currentYear.DelEvent(eventToDelete)
