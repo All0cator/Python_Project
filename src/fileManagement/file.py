@@ -48,6 +48,10 @@ class File:
         
         fileLines = file.readlines()
         
+        if(fileLines == False):
+            self.fileContents == None
+            return
+        
         self.fileContents = BufferCreateI(len(fileLines))
 
         for x in range(len(fileLines)):
@@ -67,7 +71,7 @@ class File:
             print("Error: Function WriteFile got wrong writeMode: " + writeMode + " is not a valid writeMode")
             return False
         
-        file = open(self.path, writeMode)
+        file = open(self.path, writeMode)      
         
         file.write(self.BufferToText(contentBuffer))
         
@@ -81,9 +85,13 @@ class File:
         
         text = ""
         
+        if(self.extension == ".csv"):
+            text += "Date,Hour,Duration,Title\n"
+        
         for y in range(buffer.height):
             for x in range(buffer.width):
-                text += buffer.GetXY(x, y)
+                if(buffer.GetXY(x, y) != None):
+                    text += buffer.GetXY(x, y)
         
             # if the final character of text is not a newline then add a new line to it
             if(text[len(text) - 1] != "\n"):

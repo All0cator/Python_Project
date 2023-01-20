@@ -1,7 +1,8 @@
 class EventAttribute:
-    def __init__(self, val, delimeter=", "):
+    def __init__(self, name, val, delimeter=", "):
+        self.name = name
         self.val = val
         self.delimeter = delimeter
         
     def ToText(self):
-        return self.name + ": " + self.val + self.delimeter
+        return self.name + ": " + str(self.val) + self.delimeter

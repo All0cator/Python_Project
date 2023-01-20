@@ -2,6 +2,8 @@ from m_calendar.month import Month
 
 from m_calendar.eventable import Eventable
 
+from fileManagement.buffer import BufferCreateI
+
 class Year(Eventable):
     def __init__(self, year, month, eventsToFilter):
         
@@ -9,29 +11,46 @@ class Year(Eventable):
         
         self.value = year
         
-        for i in range(len(eventsToFilter)):
-            if(self.value == eventsToFilter.GetI(i).year):
-                #add it to our events
-                self.numEvents += 1
-                self.events.Append(eventsToFilter.GetI(i))
-        
+        self.eventsToFilter = eventsToFilter
+        if(eventsToFilter != None and eventsToFilter.size != 0):
+            # count how many events are
+            
+            eventsList = list()
+            
+            for i in range(eventsToFilter.size):
+                if(self.value == eventsToFilter.GetI(i).year):
+                    #add it to our events
+                    self.numEvents += 1
+                    eventsList.append(eventsToFilter.GetI(i))
+                    
+            if(self.numEvents != 0):
+                self.events = BufferCreateI(self.numEvents)
+                
+                for i in range(self.numEvents):
+                    #add it to our events
+                    self.events.SetI(i, eventsList[i])
+            
         self.currentMonth = Month(year, month, self.events)
-        self.previousMonth = self.currentMonth.GetPreviousMonth()
-        self.nextMonth = self.currentMonth.GetNextMonth()
+        
+        previousMonthYear, previousMonth = self.currentMonth.GetPreviousMonth()
+        self.previousMonth = Month(previousMonthYear, previousMonth, self.eventsToFilter)
+        
+        nextMonthYear, nextMonth = self.currentMonth.GetNextMonth()
+        self.nextMonth = Month(nextMonthYear, nextMonth, self.eventsToFilter)
         
     def GetPreviousYear(self):
         
         if(self.value > 1):
-            return Year(self.value - 1, self.currentMonth.value, self.events)
+            return self.value - 1
         else:
-            return Year(self.value, self.currentMonth.value, self.events)
+            return self.value
 
     def GetNextYear(self):
         
         if(self.value < 9999):
-            return Year(self.value + 1, self.currentMonth.value, self.events)
+            return self.value + 1
         else:
-            return Year(self.value, self.currentMonth.value, self.events)
+            return self.value
         
     def AddEvent(self, event):
         super().AddEvent(event)
@@ -41,6 +60,9 @@ class Year(Eventable):
         
     def DelEvent(self, event):
         
+        if(self.numEvents == 0):
+            return
+        
         index = self.EventExists(event)
         
         if(index == -1):
@@ -49,6 +71,9 @@ class Year(Eventable):
         self.DelEventAt(index)
     
     def DelEventAt(self, index):
+        
+        if(self.numEvents == 0):
+            return
         
         eventToDelete = self.events.GetI(index)
         

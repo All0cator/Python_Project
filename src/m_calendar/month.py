@@ -13,13 +13,29 @@ class Month(Eventable):
         
         self.value = month
         
-        for i in range(len(eventsToFilter)):
-            if(self.value == eventsToFilter.GetI(i).month):
-                #add it to our events
-                self.numEvents += 1
-                self.events.Append(eventsToFilter.GetI(i))
-        
         self.year = year
+        self.eventsToFilter = eventsToFilter
+        
+        if(eventsToFilter != None and eventsToFilter.size != 0):
+            # count how many events are
+            
+            eventsList = list()
+            
+            for i in range(eventsToFilter.size):
+                if(self.value == eventsToFilter.GetI(i).month and self.year == eventsToFilter.GetI(i).year):
+
+                    #add it to our events
+                    self.numEvents += 1
+                    eventsList.append(eventsToFilter.GetI(i))
+            
+            if(self.numEvents != 0):
+            
+                self.events = BufferCreateI(self.numEvents)
+            
+                for i in range(self.numEvents):
+                    #add it to our events
+                    self.events.SetI(i, eventsList[i])
+        
         
         self.weeks = monthcalendar(year, month)
         
@@ -36,7 +52,7 @@ class Month(Eventable):
         
     def CreateDays(self):
         for i in range(self.numDays):
-            self.days.SetI(i, Day(i + 1, self.events))
+            self.days.SetI(i, Day(i + 1, self.events if self.events != None else None))
             
     def GetPreviousMonth(self):
         
@@ -50,7 +66,7 @@ class Month(Eventable):
             month = month - 1
             # self.year doesnt change
             
-        return Month(year, month)
+        return (year, month)
 
     def GetNextMonth(self):
         
@@ -64,7 +80,7 @@ class Month(Eventable):
             month = month + 1
             # year doesnt change
         
-        return Month(year, month)
+        return (year, month)
     
     def AddEvent(self, event):
         super().AddEvent(event)
@@ -76,6 +92,9 @@ class Month(Eventable):
 
     def DelEvent(self, event):
         
+        if(self.numEvents == 0):
+            return
+        
         index = self.EventExists(event)
         
         if(index == -1):
@@ -86,6 +105,9 @@ class Month(Eventable):
         super().DelEvent(event)
     
     def DelEventAt(self, index):
+        
+        if(self.numEvents == 0):
+            return
         
         eventToDelete = self.events.GetI(index)
         

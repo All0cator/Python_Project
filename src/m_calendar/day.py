@@ -13,13 +13,34 @@ class Day(Eventable):
         self.leftSeparator = Separator(textLeftSeparator)
         self.rightSeparator = Separator(textRightSeparator)
         
-        for i in range(len(eventsToFilter)):
-            if(self.value == eventsToFilter.GetI(i).day):
-                #add it to our events
-                self.numEvents += 1
-                self.events.Append(eventsToFilter.GetI(i))
+        # count how many events are
+        
+        if(eventsToFilter != None):
+            if(eventsToFilter.size != 0):
+                eventsList = list()
+                
+                for i in range(eventsToFilter.size):
+                    if(self.value == eventsToFilter.GetI(i).day):
+
+                        #add it to our events
+                        self.numEvents += 1
+                        eventsList.append(eventsToFilter.GetI(i))
+                        
+            
+
+                if(self.numEvents != 0):
+                    self.events = BufferCreateI(self.numEvents)
+                
+                    for i in range(self.numEvents):
+                        #add it to our events
+                        self.events.SetI(i, eventsList[i])
                 
     def GetDayIntervals(self):
+        if(self.numEvents == 0):
+            intervals = BufferCreateI(1)
+            intervals.SetI(0, Interval(0, 0, 1440))
+            
+            return intervals
         
         intervals = BufferCreateI(self.numEvents)
         
@@ -40,38 +61,3 @@ class Day(Eventable):
             self.leftSeparator.ReplaceEndCharacterWith("*")
         
         return self.leftSeparator.ToText() + str(self.value) + self.rightSeparator.ToText()
-
-"""     
-    def AddEvent(self, event):
-        
-        super().AddEvent(event)
-        
-        \"""
-        eventsBuffer = BufferCreateI(self.numEvents + 1)
-        
-        # copy old events to new Buffer
-        
-        for i in range(self.numEvents):
-            eventsBuffer.SetI(i, self.events[i])
-            
-        
-        # add new event
-        self.numEvents += 1
-        
-        lastIndex = self.numEvents - 1
-        
-        eventsBuffer.SetI(lastIndex, event)    
-        
-        # copy new eventsBuffer to our old one
-        
-        self.events = BufferCreateI(self.numEvents)
-        
-        for i in range(self.numEvents):
-            self.events.SetI(i, eventsBuffer.GetI(i))
-            
-        self.events.Sort()\"""
-    
-    def DelEvent(self, index):
-        super().DelEvent(index)
-        
-"""

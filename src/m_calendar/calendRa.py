@@ -44,15 +44,18 @@ class CalendRa(Eventable):
         
         #self.currentMonth = Month(startingYear, startingMonth)
         
-        self.events = self.LoadEvents("..\\assets\\csvFiles\\events.csv")
+        self.events = self.LoadEvents("assets\\csvFiles\\events.csv")
         
         self.currentYear = Year(startingYear, startingMonth, self.events)
+        
+        #self.previousYear = self.currentYear.GetPreviousYear(self.events)
+        #self.nextYear = self.currentYear.GetNextYear(self.events)
         
         self.daysHeader = BufferCreateI(CalendRa.NUM_WEEKDAYS)
         
         x = 0
         for day in CalendRa.days:
-            self.daysHeader.SetI(x, Day(day,"  ", " "))
+            self.daysHeader.SetI(x, Day(day, None, "  ", " "))
             
             if(x % 6 != 0 or x == 0):
                 self.daysHeader.GetI(x).rightSeparator.Append("|")
@@ -64,7 +67,11 @@ class CalendRa(Eventable):
     def LoadEvents(self, path):
         file = CSVFile(path)
         
-        eventsBuffer = BufferCreateI(file.numRows)
+        if(file.numRows - 1 == 0):
+            print("Error: Cannot load events from empty file!")
+            return
+        
+        eventsBuffer = BufferCreateI(file.numRows - 1)
         
         self.numEvents = 0
         
@@ -74,20 +81,26 @@ class CalendRa(Eventable):
             record = file.GetNthRecord(i)
             
             self.numEvents += 1
-            
+            print(record)
             event = Event(record)
-            
+                  
             eventsBuffer.SetI(i - 1, event)
-            
+        
+        return eventsBuffer
         
             
     def SaveEvents(self, path):
         file = CSVFile(path)
         
-        dataToSave = BufferCreateI(self.numEvents)
+        if(self.numEvents != 0):
         
-        for i in range(self.numEvents):
-            dataToSave.SetI(i, self.events.GetI(i).ToCSVLine())
+            dataToSave = BufferCreateI(self.numEvents)
+            
+            for i in range(self.numEvents):
+                dataToSave.SetI(i, self.events.GetI(i).ToCSVLine())
+        else:
+            dataToSave = BufferCreateI(1)
+            dataToSave.SetI(0, "")
         
         #clear file
         emptyBuffer = BufferCreateI(1)
@@ -103,8 +116,8 @@ class CalendRa(Eventable):
         
         super().AddEvent(event)
         
-        if(event.year == self.year):
-            self.year.AddEvent(event)
+        if(event.year == self.currentYear.value):
+            self.currentYear.AddEvent(event)
         
     def DelEvent(self, event):
         
@@ -128,6 +141,10 @@ class CalendRa(Eventable):
             if(index != -1):
                 self.days.GetI(i).DelEvent(index)
                 break
+            
+            
+        if(eventToDelete.year == self.currentYear.value):
+            self.currentYear.DelEvent(eventToDelete)
         
         super().DelEventAt(index)
         
@@ -143,17 +160,20 @@ class CalendRa(Eventable):
         
         return year.currentMonth.days.GetI(day - 1).events
         
-    
     def GetEventsText(self, year, month):
         
         # create the year, month, days 
         
-        year = Year(year, month, self.events)
+        nYear = Year(year, month, self.events)
+        if(nYear.currentMonth.numEvents == 0):
+            txt = "Δεν υπάρχουν γεγονότα!"
+            
+            return (txt, None)
         
-        selectedEvents = BufferCreateI(year.currentMonth.numEvents)
+        selectedEvents = BufferCreateI(nYear.currentMonth.numEvents)
         
         for i in range(selectedEvents.size):
-            selectedEvents.SetI(i, year.currentMonth.events.GetI(i))
+            selectedEvents.SetI(i, nYear.currentMonth.events.GetI(i))
         
         # now we have all events time to return a string like this
         # 0. [Event 1] -> Date: 2022-12-4, Time: 13:30, Duration: 30
@@ -166,7 +186,7 @@ class CalendRa(Eventable):
         for i in range(selectedEvents.size):
             leftSeparator = Separator(" " + str(i) + ". ")
             
-            txt += leftSeparator + selectedEvents.GetI(i).ToText()
+            txt += leftSeparator.ToText() + selectedEvents.GetI(i).ToText() + "\n"
             
         return (txt, selectedEvents)
     
@@ -176,37 +196,37 @@ class CalendRa(Eventable):
             
         if(direction == CalendRa.DIRECTION_NEXT):
             
-            nextMonth = self.currentYear.currentMonth.GetNextMonth()
-            
-            self.currentYear.currentMonth = nextMonth
-            
-            if(nextMonth.year != self.currentYear.value):
+            nextMonthYear, nextMonth = self.currentYear.currentMonth.GetNextMonth()
+            self.currentYear = Year(nextMonthYear, nextMonth, self.events)
                 
-                nextYear = self.currentYear.GetNextYear()
-                
-                self.currentYear = nextYear
         else:
-            previousMonth = self.currentYear.currentMonth.GetPreviousMonth()
             
-            self.currentYear.currentMonth = previousMonth
-            
-            if(previousMonth.year != self.currentYear.value):
-                
-                previousYear = self.currentYear.GetPreviousYear()
-                
-                self.currentYear = previousYear
+            previousMonthYear, previousMonth = self.currentYear.currentMonth.GetPreviousMonth()
+            self.currentYear = Year(previousMonthYear, previousMonth, self.events)
         
         self.UpdateCalendar()
+    
+    def IsPreviousMonthInSameYear(self, month):
+        if(month == 1):
+            return False
+        
+        return True
+    
+    def IsNextMonthInSameYear(self, month):
+        if(month == 12):
+            return False
+        
+        return True
         
     def UpdateCalendar(self):
         
-        numWeeks = len(self.currentMonth.weeks)
+        numWeeks = len(self.currentYear.currentMonth.weeks)
         
         self.calendar = BufferCreateXY(CalendRa.NUM_WEEKDAYS, numWeeks)
 
         for x in range(CalendRa.NUM_WEEKDAYS):
             for y in range(numWeeks):
-                self.calendar.SetXY(x, y, self.currentYear.weeks[y][x])
+                self.calendar.SetXY(x, y, Day(self.currentYear.currentMonth.weeks[y][x], self.currentYear.currentMonth.events))
         
         j = 0
         i = self.currentYear.currentMonth.firstDayInWeekIndex - 1

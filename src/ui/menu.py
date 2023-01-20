@@ -60,7 +60,7 @@ class Input():
         if(displayText):
             return input(self.ToText() + ": ")
         else:
-            return input(" "*len(self.text))
+            return input(" "*len(self.text) + " "*len(self.separatorLeft.ToText() + "  "))
         
     def GetValidatedInput(self, validationFunction):
         
@@ -71,7 +71,11 @@ class Input():
             choice = int(choice)
         
         while(not validationFunction(choice)):
+            
             choice = self.GetInput(False)
+            
+            if(choice.isnumeric()):
+                choice = int(choice)
             
         return choice
 

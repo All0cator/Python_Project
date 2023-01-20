@@ -31,9 +31,14 @@ class Eventable:
         self.events = None
         
     def GetEventAt(self, index):
+        if(self.numEvents == 0):
+            return
+        
         return self.events.GetI(index)
         
     def EventExists(self, event):
+        if(self.numEvents == 0):
+            return
         """
         Returns index of event if it exists else it returns -1
         We get 2 features in 1 implementation
@@ -51,9 +56,9 @@ class Eventable:
         eventsBuffer = BufferCreateI(self.numEvents + 1)
         
         # copy old events to new Buffer
-        
-        for i in range(self.numEvents):
-            eventsBuffer.SetI(i, self.events.GetI(i))
+        if(self.numEvents != 0):
+            for i in range(self.numEvents):
+                eventsBuffer.SetI(i, self.events.GetI(i))
             
         
         # add new event
@@ -76,6 +81,9 @@ class Eventable:
         """
         Deletes event at index from events
         """
+        if(self.numEvents == 0):
+            return
+        
         eventsBuffer = BufferCreateI(self.numEvents - 1)
         
         # copy old events to new Buffer except the event at index
@@ -103,6 +111,9 @@ class Eventable:
         Deletes event from events if it exists  
         """
         
+        if(self.numEvents == 0):
+            return
+        
         index = self.EventExists(event)
         
         if(index == -1):
@@ -112,6 +123,8 @@ class Eventable:
         self.DelEventAt(index)
             
     def GetEventIndex(self, event):
+        if(self.numEvents == 0):
+            return
         
         index = self.EventExists(event)
         

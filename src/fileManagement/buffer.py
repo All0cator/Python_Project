@@ -118,6 +118,9 @@ class Buffer:
         self = newBuffer
     
     def Sort(self, isAscending=True):
+        if(self.size == 1):
+            return
+        
         self.data.sort(reverse=not isAscending)
         
     def Copy(self, targetBuffer):

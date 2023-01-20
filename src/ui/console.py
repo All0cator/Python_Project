@@ -43,7 +43,12 @@ class Console(Surface):
     def PrintEventsForToday(self):
         todayDate = date.today()
         
-        year, month, day = todayDate.split("-")
+        year, month, day = str(todayDate).split("-")
+        
+        year = int(year)
+        month = int(month)
+        day = int(day)
+        
         
         # dont ask about + 2 the docs about datetime are so bad i have to offset the hour i get by 2 hours
         # thats some timezone problem in which cannot be solved without external libraries
@@ -68,23 +73,30 @@ class Console(Surface):
         
     def OnUpdate(self):
         
-        self.PrintCalendar()
-        print(mainMenu.ToText(), end="")
+        #self.PrintCalendar()
+        #print(mainMenu.ToText(), end="")
         
-        option = input()
+        #option = input()
+        
+        option = ""
+        
+        firstRun = True
         
         while(True):
             if(option == "q"):
                 break
             
+            self.PrintCalendar()
+            print(mainMenu.ToText(), end="")
+            
+            #if(firstRun):
+            option = self.GetMenuInput(mainMenu)
+            
             if(option == "-"): #left
                 
                 self.calendR.AdvanceMonth(CalendRa.DIRECTION_PREVIOUS)
                 
-                self.PrintCalendar()
-                print(mainMenu.ToText(), end="")
-                
-                option = self.GetMenuInput(mainMenu)
+                #option = self.GetMenuInput(mainMenu)
                 
                 # we use continue because we just got an option up here
                 # then below we would get another option that would overwrite our option up here
@@ -92,17 +104,17 @@ class Console(Surface):
                 # mainMenu
                 #       manageMenu
                 
-                continue
+                #continue
 
             elif(option == ""): #right
                 self.calendR.AdvanceMonth(CalendRa.DIRECTION_NEXT)
                 
-                self.PrintCalendar()
-                print(mainMenu.ToText(), end="")
+                #self.PrintCalendar()
+                #print(mainMenu.ToText(), end="")
                 
-                option = self.GetMenuInput(mainMenu)
+                #option = self.GetMenuInput(mainMenu)
                 
-                continue
+                #continue
             elif(option == "+"):
                 print(manageMenu.ToText(), end="")
                 
@@ -110,31 +122,33 @@ class Console(Surface):
                 
                 if(option == "1"):
                     self.CreateEvent()
+                    self.calendR.SaveEvents("assets\\csvFiles\\events.csv")
                 elif(option == "2"):
                     self.DeleteEvent()
+                    self.calendR.SaveEvents("assets\\csvFiles\\events.csv")
                 elif(option == "3"):
                     self.UpdateEvent()
+                    self.calendR.SaveEvents("assets\\csvFiles\\events.csv")
                 elif(option == "0"):
                     pass
-                continue
+                #continue
                 
             elif(option == "*"):
                 self.SearchEvents()
                 input("Πατήστε οποιοδήποτε χαρακτήρα για επιστροφή στο κυρίως μενού:")
-                continue
-                
-            option = input()
+            
+            #option = input()
     
     def CreateEvent(self):
         
         #Python doesnt have a do while loop so we have to do it this way :D
         
-        newEvent = self.NewEventFromInput()
+        newEvent = self.NewEventFromInput(None)
         
-        while(not newEvent.OverlapsWithOtherEvents(self.calendR.events)):
+        while(newEvent == None or newEvent.OverlapsWithOtherEvents(self.calendR.events)):
             print("Το γεγονός επικαλύπτεται απο άλλο γεγονός ξαναδώστε στοιχεία.")
             
-            newEvent = self.NewEventFromInput()
+            newEvent = self.NewEventFromInput(None)
         
         self.calendR.AddEvent(newEvent)
     
@@ -152,17 +166,21 @@ class Console(Surface):
         
         year, month, day = newDate.split("-")
         
-        checkDay = self.calendR.GetDayOfYearMonth(year, month, day)
+        checkDay = self.calendR.GetDayOfYearMonth(int(year), int(month), int(day))
         
         intervals = checkDay.GetDayIntervals()
+        if(intervals == None):
+            print("Δεν υπάρχουν διαθέσιμα χρονικά κενά για αυτήν την ημερομηνία!")
+            return None
+            
         
         alignmentText = "Διαθέσιμα χρονικά κενά: "
         
         print(alignmentText)
         
         for i in range(intervals.size):
-            if(intervals.GetI(i).startHourMin != intervals.GetI(i).endHourMin):
-                print(len(alignmentText)*" " + intervals.GetI(i).ToText())
+            #if(intervals.GetI(i).startHourMin != intervals.GetI(i).endHourMin):
+            print(len(alignmentText)*" " + intervals.GetI(i).ToText())
         
         newHour = self.ConstructHour(chosenEvent, isBlankF)
         
@@ -170,9 +188,9 @@ class Console(Surface):
         newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or isBlankF(dur))
         
         newTitleInput = Input("Τίτλος γεγονότος")
-        newTitle = newTitleInput.GetValidatedInput(lambda title : (not title.isnumeric() and not "," in str(title)) or isBlankF(title))
+        newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or isBlankF(title))
         
-        eventAttributes = [newDate, newHour, newDuration, newTitle]
+        eventAttributes = [newDate, newHour, str(newDuration), newTitle]
         
         newEvent = Event(eventAttributes)
         
@@ -180,6 +198,9 @@ class Console(Surface):
     
     def DeleteEvent(self):
         selectedEvents = self.SearchEvents()
+        
+        if(selectedEvents == None):
+            return
         
         eventChoiceInputField = Input("Επιλέξτε γεγονός προς διαγραφή")
         eventChoice = eventChoiceInputField.GetValidatedInput(lambda choice: choice < selectedEvents.size)
@@ -190,6 +211,9 @@ class Console(Surface):
         
     def UpdateEvent(self):
         selectedEvents = self.SearchEvents()
+        
+        if(selectedEvents == None):
+            return
         
         eventChoiceInputField = Input("Επιλέξτε γεγονός προς ενημέρωση")
         eventChoice = eventChoiceInputField.GetValidatedInput(lambda choice: choice < selectedEvents.size)
@@ -213,11 +237,11 @@ class Console(Surface):
         
         newHour = self.ConstructHour(chosenEvent, lambda x: False)
         
-        newDurationInput = Input("Διάρκεια γεγονότος " + "(" + chosenEvent.Get("Duration") + ")")
+        newDurationInput = Input("Διάρκεια γεγονότος " + "(" + str(chosenEvent.Get("Duration")) + ")")
         newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or dur == "")
         
         newTitleInput = Input("Τίτλος γεγονότος " + "(" + chosenEvent.Get("Title") + ")")
-        newTitle = newTitleInput.GetValidatedInput(lambda title : (not title.isnumeric() and not "," in str(title)) or str(title) == "")
+        newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or str(title) == "")
         
         
         if(newDuration == ""):
@@ -230,12 +254,12 @@ class Console(Surface):
         
         
         
-        newEvent = Event([newDate, newHour, newDuration, newTitle])
+        newEvent = Event([newDate, newHour, str(newDuration), newTitle])
         
         
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Date", newDate)
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Hour", newHour)
-        self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Duration", newDuration)
+        self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Duration", str(newDuration))
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Title", newTitle)  
             
     def SearchEvents(self):
@@ -264,7 +288,7 @@ class Console(Surface):
         else:
             dateInputText = "Ημερομηνία γεγονότος " + "(" + chosenEvent.Get("Date") + "):"
         
-        newYearValidationFunction = lambda year: year > 2022 or isBlankF(year)
+        newYearValidationFunction = lambda year: year >= 2022 or isBlankF(year)
         newMonthValidationFunction = lambda m: (m >= 1 and m <= 12) or isBlankF(m)
         
         print(dateInputText)
@@ -277,7 +301,7 @@ class Console(Surface):
         newMonthInput = Input("Μήνας γεγονότος", " "*len(dateInputText))
         newMonth = newMonthInput.GetValidatedInput(newMonthValidationFunction)
         
-        numDaysForNewMonth = monthrange(newYear, newMonth) 
+        numDaysForNewMonth = monthrange(newYear, newMonth)[1]
         
         # the validation function needs numDaysForNewMonth to work so we have to define it here and not with the other functions
         newDayValidationFunction = lambda d: (d >= 1 and d <= numDaysForNewMonth) or isBlankF(d)
@@ -294,7 +318,7 @@ class Console(Surface):
         if(newDay == ""):
             newDay = chosenEvent.day
         
-        chosenDate = "-".join([newYear, newMonth, newDay])
+        chosenDate = "-".join([str(newYear), str(newMonth), str(newDay)])
         
         return chosenDate
     
@@ -323,11 +347,11 @@ class Console(Surface):
         if(newMinutes == ""):
             newMinutes = chosenEvent.minutes
             
-        chosenHour = ":".join([newHour, newMinutes])
+        chosenHour = ":".join([str(newHour), str(newMinutes)])
         
         return chosenHour
 
-    def GetMenuInput(menu):
+    def GetMenuInput(self, menu):
         option = input(menu.GetInputText())
                 
         while(option not in menu.availableOptions):
@@ -338,7 +362,7 @@ class Console(Surface):
     def PrintCalendar(self):
         
         print("_"*CONSOLE_LINE_LENGTH + "\n")
-        print(CalendRa.months[self.calendR.currentMonth.value - 1] + "  " + str(self.calendR.currentMonth.year))
+        print(CalendRa.months[self.calendR.currentYear.currentMonth.value - 1] + "  " + str(self.calendR.currentYear.value))
         print("_"*CONSOLE_LINE_LENGTH + "\n")
         
         for x in range(self.calendR.calendar.width):

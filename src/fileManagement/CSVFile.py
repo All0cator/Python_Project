@@ -49,12 +49,23 @@ class CSVFile(File):
         
     def WriteFile(self, writeMode, contentBuffer):
         
+        if(contentBuffer == None):
+            return
+        
         #format contentBuffer into csv format to do
         
-        rows = BufferCreateI(contentBuffer.numRows)
+        rows = BufferCreateI(contentBuffer.width)
         
-        for i in range(contentBuffer.numRows):
-            rows.SetI(i, self.ListToCSVRow(contentBuffer.GetRow(i)))
+        for i in range(contentBuffer.width):
+            print(contentBuffer.GetI(i))
+            
+            row = self.ListToCSVRow(contentBuffer.GetI(i))
+            
+            if(row != None):                        
+                rows.SetI(i, row)
+            else:
+                rows.SetI(i, None)
+            
         
         return super().WriteFile(writeMode, rows)
     
@@ -80,12 +91,15 @@ class CSVFile(File):
     def ListToCSVRow(self, li):
         row = ""
         
-        for i in range(1, len(li) - 1):
+        if(li == None or len(li) == 0):
+            return None
+            
+        for i in range(0, len(li) - 1):
             row += str(li[i]) + ","
             
         finalElementIndex = len(li) - 1
         
-        row += li[finalElementIndex] + "\n"
+        row += str(li[finalElementIndex]) + "\n"
         
         return row
     
