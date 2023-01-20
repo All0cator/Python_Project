@@ -1,11 +1,3 @@
-#from guardSettings import FILE_INCLUDED_GUARD
-
-#if not FILE_INCLUDED_GUARD:
-#    FILE_INCLUDED_GUARD = False
-    
-    # here all the import statements
-    #from fileManagement import file
-    
 from fileManagement.buffer import Buffer, BufferCreateI, BufferCreateXY
 
 class File:
@@ -98,9 +90,3 @@ class File:
                 text += "\n"
             
         return text
-    
-    # Note this will not be part of the file.py final version its just for debuggin purposes
-    
-    def PrintFileContents(self):
-        for i in range(self.fileContents.size):
-            print(self.fileContents.GetI(i))

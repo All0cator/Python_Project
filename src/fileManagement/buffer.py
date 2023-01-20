@@ -1,11 +1,3 @@
-#from guardSettings import BUFFER_INCLUDED_GUARD
-
-#if not BUFFER_INCLUDED_GUARD:
-#    BUFFER_INCLUDED_GUARD = True
-    
-    # import statements for file buffer.py
-
-
 # h python den uposthrizei constructor overload opote kano auth thn patenta gia thn dhmiourgia buffer
 # syntactic sugar for Object creation
 

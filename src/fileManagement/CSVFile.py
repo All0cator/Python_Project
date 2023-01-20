@@ -1,7 +1,3 @@
-#from guardSettings import CSVFILE_INCLUDED_GUARD
-
-#if not CSVFILE_INCLUDED_GUARD:
-#    CSVFILE_INCLUDED_GUARD = True
 from fileManagement.file import *
 
 class CSVFile(File):
@@ -51,23 +47,6 @@ class CSVFile(File):
         
         if(contentBuffer == None):
             return
-        
-        #format contentBuffer into csv format to do
-        
-        #rows = BufferCreateI(contentBuffer.width)
-        
-        #for i in range(contentBuffer.width):
-        #    print(contentBuffer.GetI(i))
-        #    
-        #    row = self.ListToCSVRow(contentBuffer.GetI(i))
-        #    
-        #    if(row != None):                        
-        #        rows.SetI(i, row)
-        #    else:
-        #        rows.SetI(i, None)
-            
-        
-        #return super().WriteFile(writeMode, rows)
     
         return super().WriteFile(writeMode, contentBuffer)
     def GetHeader(self):
@@ -88,21 +67,6 @@ class CSVFile(File):
         
         # rerurns a list ["1st elemnt", "2nd elemtn", ...]
         return row
-        
-    #def ListToCSVRow(self, li):
-    #    row = ""
-    #    
-    #    if(li == None or len(li) == 0):
-    #        return None
-    #        
-    #    for i in range(0, len(li) - 1):
-    #        row += str(li[i]) + ","
-    #        
-    #    finalElementIndex = len(li) - 1
-    #    
-    #    row += str(li[finalElementIndex]) + "\n"
-    #    
-    #    return row
     
     def GetColumn(self, x):
         

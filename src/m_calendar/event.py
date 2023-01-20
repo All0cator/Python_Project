@@ -43,7 +43,7 @@ class Event:
         
         return False
     
-        # Yes i could return eventEndsBetweenOtherEvent or eventBeginsBetweenOtherEvent but the way i did it was more clear to the reader
+        # Yes i could return (eventEndsBetweenOtherEvent or eventBeginsBetweenOtherEvent) and event.date == self.date but the way i did it was more clear to the reader
     
     def OverlapsWithOtherEvents(self, events):
     
@@ -66,7 +66,7 @@ class Event:
         
         self.attributes[attributeName].val = value
         
-        # i dont care about performance after i change one of the event's attributes i update everything
+        # i dont care about performance after I change one of the event's attributes i update everything
         self.Update()
         
     def Update(self, titleBoard=["[", "]"], pointer="->"):

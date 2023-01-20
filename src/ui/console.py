@@ -1,8 +1,6 @@
-from ui.surface import Surface
 from m_calendar.calendRa import CalendRa
 from calendar import monthrange
 
-from m_calendar.interval import Interval
 from datetime import date
 from datetime import datetime
 
@@ -36,7 +34,7 @@ manageMenuAvailableOptions = ["1", "2", "3", "0"]
 
 manageMenu = Menu(manageMenuHeader, manageMenuOptions, manageMenuInput, manageMenuAvailableOptions, "")
 
-class Console(Surface):
+class Console():
     def __init__(self):
         
         self.calendR = CalendRa()
@@ -52,16 +50,8 @@ class Console(Surface):
         month = int(month)
         day = int(day)
         
-        
-        print(year, month, day)
-        
-        # dont ask about + 2 the docs about datetime are so bad i have to offset the hour i get by 2 hours
-        # thats some timezone problem in which cannot be solved without external libraries
-        
-        hour = datetime.now().hour# magic
+        hour = datetime.now().hour
         minutes = datetime.now().minute
-        
-        print(hour, minutes)
         
         eventsForToday = self.calendR.GetEvents(year, month, day)
         
@@ -82,15 +72,7 @@ class Console(Surface):
                 print("Ειδοποίηση: σε {0} ώρες και {1} λεπτά από τώρα έχει προγραμματιστεί το γεγονός :\n {2}".format(hoursDifference, minsDifference, e.ToText()))
         
     def OnUpdate(self):
-        
-        #self.PrintCalendar()
-        #print(mainMenu.ToText(), end="")
-        
-        #option = input()
-        
         option = ""
-        
-        firstRun = True
         
         while(True):
             if(option == "q"):
@@ -99,32 +81,15 @@ class Console(Surface):
             self.PrintCalendar()
             print(mainMenu.ToText(), end="")
             
-            #if(firstRun):
             option = self.GetMenuInput(mainMenu)
             
             if(option == "-"): #left
                 
                 self.calendR.AdvanceMonth(CalendRa.DIRECTION_PREVIOUS)
-                
-                #option = self.GetMenuInput(mainMenu)
-                
-                # we use continue because we just got an option up here
-                # then below we would get another option that would overwrite our option up here
-                # This is used to simulate the different menu levels
-                # mainMenu
-                #       manageMenu
-                
-                #continue
 
             elif(option == ""): #right
                 self.calendR.AdvanceMonth(CalendRa.DIRECTION_NEXT)
                 
-                #self.PrintCalendar()
-                #print(mainMenu.ToText(), end="")
-                
-                #option = self.GetMenuInput(mainMenu)
-                
-                #continue
             elif(option == "+"):
                 print(manageMenu.ToText(), end="")
                 
@@ -141,13 +106,10 @@ class Console(Surface):
                     self.calendR.SaveEvents("assets\\csvFiles\\events.csv")
                 elif(option == "0"):
                     pass
-                #continue
                 
             elif(option == "*"):
                 self.SearchEvents()
                 input("Πατήστε οποιοδήποτε χαρακτήρα για επιστροφή στο κυρίως μενού:")
-            
-            #option = input()
     
     def CreateEvent(self):
         
@@ -196,12 +158,10 @@ class Console(Surface):
         
         newDurationInput = Input("Διάρκεια γεγονότος")
         newDurationValidationFunc = lambda d: DurationValidation(d, isBlankF)
-        #newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or isBlankF(dur))
         newDuration = newDurationInput.GetValidatedInput(newDurationValidationFunc)
         
         newTitleInput = Input("Τίτλος γεγονότος")
         newTitleValidationFunc = lambda title: TitleValidation(title, isBlankF)
-        #newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or isBlankF(title))
         newTitle = newTitleInput.GetValidatedInput(newTitleValidationFunc)
         
         eventAttributes = [newDate, newHour, str(newDuration), newTitle]
@@ -257,12 +217,10 @@ class Console(Surface):
         
         newDurationInput = Input("Διάρκεια γεγονότος " + "(" + str(chosenEvent.Get("Duration")) + ")")
         newDurationValidationFunc = lambda d: DurationValidation(d)
-        #newDuration = newDurationInput.GetValidatedInput(lambda dur: dur > 0 or dur == "")
         newDuration = newDurationInput.GetValidatedInput(newDurationValidationFunc)
         
         newTitleInput = Input("Τίτλος γεγονότος " + "(" + chosenEvent.Get("Title") + ")")
         newTitleValidationFunc = lambda title: TitleValidation(title)
-        #newTitle = newTitleInput.GetValidatedInput(lambda title : (not type(title) == int and not "," in str(title)) or str(title) == "")
         newTitle = newTitleInput.GetValidatedInput(newTitleValidationFunc)
         
         if(newDuration == ""):
@@ -271,12 +229,7 @@ class Console(Surface):
         if(newTitle == ""):
             newTitle = chosenEvent.Get("Title")
         
-        chosenEventIndexInCalendR = self.calendR.GetEventIndex(chosenEvent)
-        
-        
-        
-        newEvent = Event([newDate, newHour, str(newDuration), newTitle])
-        
+        chosenEventIndexInCalendR = self.calendR.GetEventIndex(chosenEvent)     
         
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Date", newDate)
         self.calendR.GetEventAt(chosenEventIndexInCalendR).Set("Hour", newHour)
@@ -289,12 +242,10 @@ class Console(Surface):
         
         yearInputField = Input("Εισάγετε έτος")
         yearValidationFunc = lambda y : YearCreateValidation(y)
-        #year = yearInputField.GetValidatedInput(lambda y: y >= 1 and y <= 9999)
         year = yearInputField.GetValidatedInput(yearValidationFunc)
         
         monthInputField = Input("Εισάγετε μήνα")
         monthValidationFunc = lambda m: MonthValidation(m, lambda x: False)
-        #month = monthInputField.GetValidatedInput(lambda m: m >= 1 and m <= 12)
         month = monthInputField.GetValidatedInput(monthValidationFunc)
             
         tup = self.calendR.GetEventsText(year, month)

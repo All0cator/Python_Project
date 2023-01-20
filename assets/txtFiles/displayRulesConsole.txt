@@ -1,6 +1,0 @@
-Encoding the display for console
-F
-
-
-MENU_HEADER
-Πατήστε ENTER για προβολή του επόμενου μήνα, "q" για έξοδο ή κάποια από τις παρακάτω επιλογές

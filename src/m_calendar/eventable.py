@@ -1,9 +1,4 @@
-# Theory behind correct double inheritance usage : double inheritance requires smart usage 
-# to not get it wrong leading to diamond problem
-# due to double inheritance this module should be at the top of hierarchy tree meaning this class doesnt inherit from anything
- 
-
-from fileManagement.buffer import BufferCreateI, Buffer
+from fileManagement.buffer import BufferCreateI
 
 class Eventable:
     """

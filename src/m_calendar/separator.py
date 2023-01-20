@@ -1,6 +1,3 @@
-#from ui.console import CONSOLE_LINE_LENGTH
-
-
 CONSOLE_LINE_LENGTH = 50
 
 class Separator:

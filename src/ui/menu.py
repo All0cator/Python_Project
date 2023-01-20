@@ -1,6 +1,3 @@
-#UI : User Interface
-# These are all the "printable" elements on the screen
-
 from m_calendar.separator import Separator
 
 class Menu():

@@ -20,7 +20,6 @@
 from fileManagement.buffer import BufferCreateI, BufferCreateXY
 from fileManagement.CSVFile import CSVFile
 from m_calendar.separator import Separator
-from m_calendar.month import Month
 from m_calendar.day import Day
 from m_calendar.year import Year
 from m_calendar.event import Event
@@ -42,14 +41,9 @@ class CalendRa(Eventable):
     
     def __init__(self, startingYear=2022, startingMonth=12):
         
-        #self.currentMonth = Month(startingYear, startingMonth)
-        
         self.events = self.LoadEvents("assets\\csvFiles\\events.csv")
         
         self.currentYear = Year(startingYear, startingMonth, self.events)
-        
-        #self.previousYear = self.currentYear.GetPreviousYear(self.events)
-        #self.nextYear = self.currentYear.GetNextYear(self.events)
         
         self.daysHeader = BufferCreateI(CalendRa.NUM_WEEKDAYS)
         
@@ -81,7 +75,6 @@ class CalendRa(Eventable):
             record = file.GetNthRecord(i)
             
             self.numEvents += 1
-            print(record)
             event = Event(record)
                   
             eventsBuffer.SetI(i - 1, event)
@@ -227,9 +220,6 @@ class CalendRa(Eventable):
             leftSeparator = Separator()
             rightSeparator = Separator()
             
-            if(self.currentYear.previousMonth.numDays - i < 10):
-                print("Does this ever run?") # FLAG1
-                leftSeparator.Append(" ")
             leftSeparator.Append("   ")    
             self.calendar.GetI(j).leftSeparator.Append(leftSeparator.ToText())
             
